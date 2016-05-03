@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: IntelTinyB
+Bundle-SymbolicName: org.doggateway.libraries.intel.tinyb
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: lib/tinyb.jar,
+ .
+Bundle-NativeCode: nativelib/libjavatinyb.so; osname=Linux; processor=x86_64
+Export-Package: org.doggateway.libraries.intel.tinyb.service,
+ tinyb
+Service-Component: OSGI-INF/bluetooth-service.xml
