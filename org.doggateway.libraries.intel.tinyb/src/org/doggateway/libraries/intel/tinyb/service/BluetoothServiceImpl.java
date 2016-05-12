@@ -168,11 +168,11 @@ public class BluetoothServiceImpl implements BluetoothService
 		List<BluetoothGattService> bluetoothServices = null;
 
 		int nTrialsDone = 0;
-		boolean found = true;
+		boolean found = false;
 
 		// look for the device up to the given amount of times
-		while ((!found) && ((nTrials < 0)
-				|| ((nTrials > 0) && (nTrialsDone < nTrials))))
+		while (((!found) && (nTrials < 0))
+				|| ((nTrials > 0) && (nTrialsDone < nTrials)))
 		{
 			// increment the number of attempted trials
 			if (nTrials > 0)
