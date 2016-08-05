@@ -81,13 +81,13 @@ public class HelloTinyB {
             
 
             for (BluetoothGattService service : bluetoothServices) {
-                System.out.println("UUID: " + service.getUuid());
+                System.out.println("UUID: " + service.getUUID());
                 
                 List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
                 for(BluetoothGattCharacteristic characteristic : characteristics)
-                	System.out.println("Char UUID: " + characteristic.getUuid());
+                	System.out.println("Char UUID: " + characteristic.getUUID());
                 
-                if (service.getUuid().equals(UUID))
+                if (service.getUUID().equals(UUID))
                     tempService = service;
             }
             Thread.sleep(4000);
@@ -99,7 +99,7 @@ public class HelloTinyB {
         List<BluetoothGattCharacteristic> characteristics = service.getCharacteristics();
 
         for (BluetoothGattCharacteristic characteristic : characteristics) {
-            if (characteristic.getUuid().equals(UUID))
+            if (characteristic.getUUID().equals(UUID))
                 return characteristic;
         }
         return null;
@@ -176,7 +176,7 @@ public class HelloTinyB {
             sensor.disconnect();
             System.exit(-1);
         }
-        System.out.println("Found service " + tempService.getUuid());
+        System.out.println("Found service " + tempService.getUUID());
 
         BluetoothGattCharacteristic tempValue = getCharacteristic(tempService, "f000aa01-0451-4000-b000-000000000000");
         BluetoothGattCharacteristic tempConfig = getCharacteristic(tempService, "f000aa02-0451-4000-b000-000000000000");
@@ -197,7 +197,7 @@ public class HelloTinyB {
             sensor.disconnect();
             System.exit(-1);
         }
-        System.out.println("Found service " + tempService.getUuid());
+        System.out.println("Found service " + tempService.getUUID());
 
         BluetoothGattCharacteristic humidityValue = getCharacteristic(humidityService, "f000aa21-0451-4000-b000-000000000000");
         BluetoothGattCharacteristic humidityConfig = getCharacteristic(humidityService, "f000aa22-0451-4000-b000-000000000000");

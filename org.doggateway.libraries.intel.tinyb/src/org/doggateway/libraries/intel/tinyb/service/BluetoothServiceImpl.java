@@ -55,7 +55,7 @@ public class BluetoothServiceImpl implements BluetoothService
 		deviceString.append("\"name\":\"" + device.getName() + "\",");
 		deviceString.append("\"address\":\"" + device.getAddress() + "\",");
 		deviceString.append("\"connected\":" + device.getConnected() + ",");
-		deviceString.append("\"rssi\":" + device.getRssi());
+		deviceString.append("\"rssi\":" + device.getRSSI());
 		deviceString.append("}");
 
 		return deviceString.toString();
@@ -162,7 +162,7 @@ public class BluetoothServiceImpl implements BluetoothService
 		for (BluetoothGattCharacteristic characteristic : characteristics)
 		{
 			// check for UUID match
-			if (characteristic.getUuid().equals(UUID))
+			if (characteristic.getUUID().equals(UUID))
 				// store the found characteristics
 				ch = characteristic;
 		}
@@ -208,7 +208,7 @@ public class BluetoothServiceImpl implements BluetoothService
 					// check if the given UUID matches with the UUID of the
 					// current
 					// service
-					if (service.getUuid().equals(UUID))
+					if (service.getUUID().equals(UUID))
 					{
 						// store the found service
 						serv = service;
@@ -271,7 +271,7 @@ public class BluetoothServiceImpl implements BluetoothService
 				// fill the map to return
 				for (BluetoothGattService bService : bluetoothServices)
 				{
-					servicesMap.put(bService.getUuid(), bService);
+					servicesMap.put(bService.getUUID(), bService);
 				}
 			}
 			else
