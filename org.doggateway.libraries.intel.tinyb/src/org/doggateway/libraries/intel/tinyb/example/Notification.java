@@ -1,5 +1,9 @@
 package org.doggateway.libraries.intel.tinyb.example;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /*
  * Author: Petre Eftime <petre.p.eftime@intel.com>
  * Copyright (c) 2016 Intel Corporation.
@@ -23,11 +27,11 @@ package org.doggateway.libraries.intel.tinyb.example;
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-import tinyb.*;
-import java.util.*;
-
-import java.util.concurrent.locks.*;
+import tinyb.BluetoothDevice;
+import tinyb.BluetoothGattCharacteristic;
+import tinyb.BluetoothGattService;
+import tinyb.BluetoothManager;
+import tinyb.BluetoothNotification;
 
 class ValueNotification implements BluetoothNotification<byte[]> {
 
@@ -54,6 +58,69 @@ class ValueNotification implements BluetoothNotification<byte[]> {
 
 
     }
+
+}
+
+class AccelNotification implements BluetoothNotification<byte[]> {
+
+    public void run(byte[] value) {
+    	// interpret the data
+    			int gyroXRaw = (value[0] + (value[1] << 8)); // signed integer
+    			int gyroYRaw = (value[2] + (value[3] << 8));
+    			int gyroZRaw = (value[4] + (value[5] << 8));
+    			int accXRaw = (value[6] + (value[7] << 8));
+    			int accYRaw = (value[8] + (value[9] << 8));
+    			int accZRaw = (value[10] + (value[11] << 8));
+    			int magXRaw = (value[12] + (value[13] << 8));
+    			int magYRaw = (value[14] + (value[15] << 8));
+    			int magZRaw = (value[16] + (value[17] << 8));
+
+            System.out.println(
+                    String.format("AccX=%f AccY=%f AccZ=%f\nGyroX=%f GyroY=%f GyroZ=%f", 
+                    		accConvert(accXRaw, (byte)0x02),
+                    		accConvert(accYRaw, (byte)0x02),
+                    		accConvert(accZRaw, (byte)0x02),
+                    		gyroConvert(gyroXRaw),
+                    		gyroConvert(gyroYRaw),
+                    		gyroConvert(gyroZRaw)));
+
+    }
+    
+    private float gyroConvert(int value)
+	{
+		return (value * 1.0f) / (65536 / 500);
+	}
+    
+    private float accConvert(int value, byte config)
+	{
+		float valueFloat = 0;
+		switch (config)
+		{
+			case 0x00:
+			{
+				valueFloat = (value * 1.0f) / (32768 / 2);
+				break;
+			}
+			case 0x01:
+			{
+				valueFloat = (value * 1.0f) / (32768 / 4);
+				break;
+			}
+			case 0x02:
+			{
+				valueFloat = (value * 1.0f) / (32768 / 8);
+				break;
+			}
+			case 0x03:
+			{
+				valueFloat = (value * 1.0f) / (32768 / 16);
+				break;
+			}
+		}
+
+		return valueFloat;
+	}
+
 
 }
 
@@ -193,6 +260,49 @@ public class Notification {
         tempPeriod.writeValue(period);
 
         tempValue.enableValueNotifications(new ValueNotification());
+        
+        // -------- accel notifications
+        /*
+         * Our device should expose a temperature service, which has a UUID we can find out from the data sheet. The service
+         * description of the SensorTag can be found here:
+         * http://processors.wiki.ti.com/images/a/a8/BLE_SensorTag_GATT_Server.pdf. The service we are looking for has the
+         * short UUID AA00 which we insert into the TI Base UUID: f000XXXX-0451-4000-b000-000000000000
+         */
+        BluetoothGattService movementService = sensor.find( "f000aa80-0451-4000-b000-000000000000");
+
+        if (tempService == null) {
+            System.err.println("This device does not have the movement service we are looking for.");
+            sensor.disconnect();
+            System.exit(-1);
+        }
+        System.out.println("Found service " + movementService.getUUID());
+
+        BluetoothGattCharacteristic movementValue = movementService.find("f000aa81-0451-4000-b000-000000000000");
+        //BluetoothGattCharacteristic movementEnable = movementService.find("f0002902-0451-4000-b000-000000000000");
+        BluetoothGattCharacteristic movementConfig = movementService.find("f000aa82-0451-4000-b000-000000000000");
+        BluetoothGattCharacteristic movementPeriod = movementService.find("f000aa83-0451-4000-b000-000000000000");
+
+        if (movementValue == null || movementConfig == null  || movementPeriod==null) {
+            System.err.println("Could not find the correct characteristics.");
+            sensor.disconnect();
+            System.exit(-1);
+        }
+
+        System.out.println("Found the movement characteristics");
+
+        /*
+         * Turn on the Temperature Service by writing 1 in the configuration characteristic, as mentioned in the PDF
+         * mentioned above. We could also modify the update interval, by writing in the period characteristic, but the
+         * default 1s is good enough for our purposes.
+         */
+        byte[] configM = { (byte) 0xff, (byte) 0x02 };
+        movementConfig.writeValue(configM);
+        byte[] enable = { (byte) 0x01,	(byte) 0x00 };
+        byte[] periodM = {(byte)0x0A};
+        movementPeriod.writeValue(periodM);
+        //movementEnable.writeValue(enable);
+        movementValue.enableValueNotifications(new AccelNotification());
+
 
         lock.lock();
         try {
