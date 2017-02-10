@@ -10,3 +10,4 @@ Bundle-NativeCode: nativelib/libjavatinyb.so
 Export-Package: org.doggateway.libraries.intel.tinyb.service,
  tinyb
 Service-Component: OSGI-INF/bluetooth-service.xml
+Bundle-ActivationPolicy: lazy
